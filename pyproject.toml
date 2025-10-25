@@ -1,0 +1,58 @@
+[tool.black]
+line-length = 88
+target-version = ["py311"]
+exclude = '''
+(
+  /(
+      \.venv
+    | venv
+    | build
+    | dist
+    | migrations
+    | __pycache__
+    | tests
+  )/
+)
+'''
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+fix = true
+exclude = [
+    ".venv",
+    "venv",
+    "build",
+    "dist",
+    "migrations",
+    "__pycache__",
+    "tests",
+]
+
+# Enable common linting rulesets
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+    "I",   # import sorting
+    "B",   # bugbear
+    "UP",  # pyupgrade
+    "D",   # pydocstyle (for docstring conventions)
+]
+# Ignore specific rules if necessary
+ignore = ["D107"]  # Ignore missing docstring in __init__
+
+# Use NumPy-style docstrings
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+ignore_missing_imports = true
+strict_optional = true
+# Exclude folders for MyPy as well
+exclude = '(venv|\.venv|migrations|build|dist|tests|__pycache__)'

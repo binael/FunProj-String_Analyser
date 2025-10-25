@@ -1,0 +1,55 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite3
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Environment files
+.env
+*.env
+
+# IDEs and editors
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Build
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
+logs
+
+# Log files
+logs/
+*.log
+
+# Local development/testing
+test.py
+test2.py
+migrations/
+
+# Ruff
+.ruff_cache/
+
+# Static files
+uploads/
+
+# mypy
+.mypy_cache/
