@@ -1,22 +1,10 @@
-# HNG13-oneExcellent — here’s a **comprehensive `README.md`** for your FastAPI + async SQLAlchemy project that analyzes and stores string properties in PostgreSQL.
-
-This guide includes:
-✅ full project overview
-✅ code and process explanation
-✅ local installation (no Docker)
-✅ example API calls and responses (success & failure)
-✅ `requirements.txt` section
-
----
-
-## 🧾 README.md
-
 ````markdown
 # 🧠 String Analysis REST API
 
 This project is a **FastAPI-based asynchronous REST API** that analyzes text strings and stores their computed properties in a **PostgreSQL** database.
 
 It demonstrates:
+
 - Asynchronous I/O with **FastAPI + SQLAlchemy (async)**
 - **PostgreSQL JSONB** storage
 - **Rule-based natural language filtering**
@@ -28,26 +16,26 @@ It demonstrates:
 
 For each analyzed string, the API computes and stores:
 
-| Property | Description |
-|-----------|-------------|
-| `length` | Number of characters |
-| `is_palindrome` | Whether the string reads the same backward and forward (case-insensitive) |
-| `unique_characters` | Count of distinct characters |
-| `word_count` | Number of words (split by whitespace) |
-| `sha256_hash` | Unique SHA-256 hash identifier |
-| `character_frequency_map` | Mapping of each character to its count |
+| Property                  | Description                                                               |
+| ------------------------- | ------------------------------------------------------------------------- |
+| `length`                  | Number of characters                                                      |
+| `is_palindrome`           | Whether the string reads the same backward and forward (case-insensitive) |
+| `unique_characters`       | Count of distinct characters                                              |
+| `word_count`              | Number of words (split by whitespace)                                     |
+| `sha256_hash`             | Unique SHA-256 hash identifier                                            |
+| `character_frequency_map` | Mapping of each character to its count                                    |
 
 ---
 
 ## 🧩 Endpoints Overview
 
-| Method | Endpoint | Description |
-|---------|-----------|-------------|
-| `POST` | `/strings` | Analyze and store a new string |
-| `GET` | `/strings/{string_value}` | Retrieve stored string data |
-| `GET` | `/strings` | List all strings with optional filters |
-| `GET` | `/strings/filter-by-natural-language` | Filter using plain English queries |
-| `DELETE` | `/strings/{string_value}` | Delete a string from the system |
+| Method   | Endpoint                              | Description                            |
+| -------- | ------------------------------------- | -------------------------------------- |
+| `POST`   | `/strings`                            | Analyze and store a new string         |
+| `GET`    | `/strings/{string_value}`             | Retrieve stored string data            |
+| `GET`    | `/strings`                            | List all strings with optional filters |
+| `GET`    | `/strings/filter-by-natural-language` | Filter using plain English queries     |
+| `DELETE` | `/strings/{string_value}`             | Delete a string from the system        |
 
 ---
 
@@ -66,22 +54,24 @@ For each analyzed string, the API computes and stores:
 
 ## 🧠 Code Description (main.py)
 
-| Section | Summary |
-|----------|----------|
-| **Model** | `AnalyzedString` defines columns: `id (sha256)`, `value`, `properties (JSONB)`, `created_at`. |
-| **Schema** | Pydantic models for request/response validation. |
+| Section               | Summary                                                                                                                                  |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Model**             | `AnalyzedString` defines columns: `id (sha256)`, `value`, `properties (JSONB)`, `created_at`.                                            |
+| **Schema**            | Pydantic models for request/response validation.                                                                                         |
 | **Utility Functions** | - `analyze_string()` computes properties.<br>- `parse_nl_query()` interprets English phrases like "all single word palindromic strings". |
-| **Routes** | Implements all RESTful endpoints with error handling and filtering. |
-| **Database Setup** | Uses `create_async_engine` with `asyncpg`. Table auto-creates at startup. |
+| **Routes**            | Implements all RESTful endpoints with error handling and filtering.                                                                      |
+| **Database Setup**    | Uses `create_async_engine` with `asyncpg`. Table auto-creates at startup.                                                                |
 
 ---
 
 ## ⚙️ Installation (Local, No Docker)
 
 ### 1️⃣ Clone the repository
+
 ```bash
 git clone https://github.com/yourusername/string-analysis-api.git
 cd string-analysis-api
+```
 ````
 
 ### 2️⃣ Create and activate a virtual environment
@@ -147,7 +137,7 @@ asyncpg==0.29.0
 pydantic==2.8.2
 ```
 
-*(versions may update — these are known working ones)*
+_(versions may update — these are known working ones)_
 
 ---
 
@@ -259,7 +249,6 @@ curl "http://127.0.0.1:8000/strings/filter-by-natural-language?query=all%20singl
 
 ---
 
-
 ## 🧰 Project Structure
 
 ```
@@ -277,5 +266,3 @@ HNG13-one/
 
 Developed by **Binael Nchekwube**
 © 2025 — Open to contributions.
-
-
