@@ -1,4 +1,3 @@
-````markdown
 # 🧠 String Analysis REST API
 
 This project is a **FastAPI-based asynchronous REST API** that analyzes text strings and stores their computed properties in a **PostgreSQL** database.
@@ -72,7 +71,6 @@ For each analyzed string, the API computes and stores:
 git clone https://github.com/yourusername/string-analysis-api.git
 cd string-analysis-api
 ```
-````
 
 ### 2️⃣ Create and activate a virtual environment
 
