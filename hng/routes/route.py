@@ -45,6 +45,8 @@ from typing import Annotated, Any
 from fastapi import APIRouter, Body, HTTPException, Path, Query, status
 from sqlalchemy import select
 from sqlmodel import and_
+import httpx
+import json
 
 from hng.dependencies import sessionDep
 from hng.model.analyser import Analyser
@@ -54,6 +56,7 @@ from hng.schema.properties_model import PropertiesModel
 from hng.schema.string_response import StringResponse
 from hng.utils import create_properties, get_sha256
 
+NLP_API_URL = "https://nlp-funproj-string-analyser.onrender.com"
 logger = logging.getLogger(__name__)
 
 string_router = APIRouter(
@@ -261,3 +264,115 @@ async def get_all_strings(
     ]
 
     return ListResponse(data=data, count=len(data), filters_applied=params)
+
+
+@string_router.get("/filter-by-natural-language", status_code=status.HTTP_200_OK)
+async def filter_by_natural_language(
+    session: sessionDep,
+    query: str = Query(..., description="Natural language query to parse filters from"),
+):
+    """
+    Parse a natural language query into structured filters using the remote NLP API,
+    then retrieve matching strings from the database.
+
+    Example:
+    --------
+    GET /strings/filter-by-natural-language?query=strings%20longer%20than%2010%20characters
+
+    Returns:
+    --------
+    {
+        "data": [...],
+        "count": 5,
+        "interpreted_query": {
+            "original": "strings longer than 10 characters",
+            "parsed_filters": {"min_length": 11}
+        }
+    }
+    """
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(NLP_API_URL, params={"query": query})
+            response.raise_for_status()
+            logger.info("Successfully retrieved filters from NLP API.")
+        except httpx.RequestError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail=f"Failed to reach NLP API: {exc}",
+            )
+        except httpx.HTTPStatusError as exc:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"NLP API returned error: {exc.response.text}",
+            )
+
+    try:
+        parsed_filters = response.json()
+    except json.JSONDecodeError:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail="Invalid JSON returned from NLP API",
+        )
+
+    if not parsed_filters:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Unable to parse natural language query",
+        )
+    return await parsed_filters
+
+    # Apply parsed filters to the database query
+    params = {}
+    condition = []
+
+    is_palindrome = parsed_filters.get("is_palindrome")
+    min_length = parsed_filters.get("min_length")
+    max_length = parsed_filters.get("max_length")
+    word_count = parsed_filters.get("word_count")
+    contains_character = parsed_filters.get("contains_character")
+
+    if is_palindrome is not None:
+        condition.append(Analyser.is_palindrome == is_palindrome)
+        params["is_palindrome"] = is_palindrome
+    if min_length is not None:
+        condition.append(Analyser.length >= min_length)
+        params["min_length"] = min_length
+    if max_length is not None:
+        condition.append(Analyser.length <= max_length)
+        params["max_length"] = max_length
+    if word_count is not None:
+        condition.append(Analyser.word_count == word_count)
+        params["word_count"] = word_count
+    if contains_character:
+        char = contains_character.strip().lower()
+        condition.append(Analyser.character_frequency_map.has_key(char))
+        params["contains_character"] = contains_character
+
+    if not condition:
+        raise HTTPException(status_code=404, detail=DOES_NOT_EXIST)
+
+    statement = select(Analyser).where(and_(*condition))
+    data = await session.execute(statement)
+    result = data.scalars().all()
+
+    if not result:
+        raise HTTPException(status_code=404, detail=DOES_NOT_EXIST)
+
+    data = [
+        StringResponse(
+            id=r.id,
+            value=r.value,
+            properties=PropertiesModel(**r.__dict__),
+            created_at=r.created_at,
+        )
+        for r in result
+    ]
+
+    return {
+        "data": data,
+        "count": len(data),
+        "interpreted_query": {
+            "original": query,
+            "parsed_filters": parsed_filters,
+        },
+    }
